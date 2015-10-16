@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:updatePeriodMillis="60000"
+    android:previewImage="@android:drawable/ic_menu_gallery"
+    android:initialLayout="@layout/rss_widget">
+</appwidget-provider>

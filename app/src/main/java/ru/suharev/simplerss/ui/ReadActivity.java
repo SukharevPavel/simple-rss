@@ -1,34 +1,37 @@
 package ru.suharev.simplerss.ui;
 
-import android.support.v7.app.AppCompatActivity;
-import android.support.v4.app.FragmentManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.support.v4.widget.DrawerLayout;
 import android.widget.Toast;
 
 import java.util.List;
 
 import ru.suharev.simplerss.R;
 import ru.suharev.simplerss.utils.CurrentRss;
+import ru.suharev.simplerss.utils.GetRssTask;
 import ru.suharev.simplerss.utils.NoRssException;
+import ru.suharev.simplerss.utils.RssCallback;
 import ru.suharev.simplerss.utils.RssItem;
 
 public class ReadActivity extends AppCompatActivity
-        implements RssListFragment.NavigationDrawerCallbacks, AddRssDialogFragment.GetRssListCallback {
+        implements RssCallback {
 
+    private static String ADD_RSS_FRAGMENT_TAG = "add_rss_fragment_tag";
+    private static String SET_RSS_FRAGMENT_TAG = "set_rss_fragment_tag";
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
-    private RssListFragment mNavigationDrawerFragment;
+    private NavigationDrawerListFragment mNavigationDrawerFragment;
     private AddRssDialogFragment mAddRssFragment;
     private SetRssNameDialogFragment mSetRssFragment;
-    private RssFragment mRssFragment;
-    private static String ADD_RSS_FRAGMENT_TAG = "add_rss_fragment_tag";
-    private static String SET_RSS_FRAGMENT_TAG = "set_rss_fragment_tag";
+    private ReadFragment mRssFragment;
+    private GetRssFromDialogTask mGetRssTask;
 
 
     private Toolbar mToolbar;
@@ -37,12 +40,15 @@ public class ReadActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_read);
-        mRssFragment = (RssFragment) getSupportFragmentManager().findFragmentById(R.id.read_fragment);
-        mNavigationDrawerFragment = (RssListFragment)
-                getSupportFragmentManager().findFragmentById(R.id.rss_list);
+        mRssFragment = (ReadFragment) getSupportFragmentManager().findFragmentById(R.id.read_fragment);
+
+        mGetRssTask = new GetRssFromDialogTask();
+
+
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
-        // Set up the drawer.
+        mNavigationDrawerFragment = (NavigationDrawerListFragment)
+                getSupportFragmentManager().findFragmentById(R.id.rss_list);
         mNavigationDrawerFragment.setUp(
                 R.id.rss_list,
                 (DrawerLayout) findViewById(R.id.drawer_layout),
@@ -55,9 +61,6 @@ public class ReadActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public void onNavigationDrawerItemSelected(int position) {
-    }
 
     private void showAddRssDialog(){
         if (getSupportFragmentManager().findFragmentByTag(ADD_RSS_FRAGMENT_TAG) == null) {
@@ -87,17 +90,16 @@ public class ReadActivity extends AppCompatActivity
     }
 
 
-    @Override
-    public void onGetRssList(List<RssItem> list) {
+    public void setRssList(List<RssItem> list) {
         Log.i("ReadActivity", "Successfully get list");
         mRssFragment.setArray(list);
         CurrentRss.set(list);
     }
 
-    @Override
-    public void onFail() {
+    public void fail() {
         Toast.makeText(this, getString(R.string.toast_error_get_rss), Toast.LENGTH_SHORT).show();
     }
+
 
     @Override
     public void onAddNewRss(String rss) {
@@ -109,4 +111,23 @@ public class ReadActivity extends AppCompatActivity
             mSetRssFragment.show(getSupportFragmentManager(), SET_RSS_FRAGMENT_TAG);
         }
     }
+
+    @Override
+    public void onGetRssRequest(String uri) {
+        if (mGetRssTask.getStatus() != AsyncTask.Status.RUNNING) mGetRssTask.execute(uri);
+    }
+
+    class GetRssFromDialogTask extends GetRssTask {
+
+        @Override
+        protected void onPostExecute(List<RssItem> result) {
+            if (result != null) {
+                setRssList(result);
+            } else
+                fail();
+        }
+
+    }
+
+
 }

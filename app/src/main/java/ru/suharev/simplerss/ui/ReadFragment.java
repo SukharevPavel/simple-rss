@@ -16,9 +16,9 @@ import ru.suharev.simplerss.R;
 import ru.suharev.simplerss.utils.RssItem;
 
 /**
- * Created by pasha on 06.10.2015.
+ * Fragment, which contains list of RSS entries
  */
-public class RssFragment extends ListFragment {
+public class ReadFragment extends ListFragment {
     /**
      * The fragment argument representing the section number for this
      * fragment.
@@ -29,15 +29,15 @@ public class RssFragment extends ListFragment {
      * Returns a new instance of this fragment for the given section
      * number.
      */
-    public static RssFragment newInstance(int sectionNumber) {
-        RssFragment fragment = new RssFragment();
+    public static ReadFragment newInstance(int sectionNumber) {
+        ReadFragment fragment = new ReadFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_SECTION_NUMBER, sectionNumber);
         fragment.setArguments(args);
         return fragment;
     }
 
-    public void setArray(List<RssItem> list){
+    public void setArray(List<RssItem> list) {
         setListAdapter(new RssFeedAdapter(getContext(),
                 R.layout.rss_feed_item,
                 list));
@@ -46,12 +46,12 @@ public class RssFragment extends ListFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_read, container, false);
-        return rootView;
+        return inflater.inflate(R.layout.fragment_read, container, false);
+
     }
 
-    public class RssFeedAdapter extends ArrayAdapter<RssItem>{
-        
+    public class RssFeedAdapter extends ArrayAdapter<RssItem> {
+
         private LayoutInflater mInflater;
         private int mResource;
 
@@ -91,19 +91,19 @@ public class RssFragment extends ListFragment {
             convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(getContext(),RssItemActivity.class);
+                    Intent intent = new Intent(getContext(), RssItemActivity.class);
                     intent.putExtra(RssItemActivity.EXTRA_POSITION, position);
                     startActivity(intent);
-                    }
+                }
             });
             return convertView;
         }
 
-        private void openItem(RssItem item){
+        private void openItem(RssItem item) {
 
         }
 
-        class ViewHolder{
+        class ViewHolder {
             TextView title;
             TextView date;
             TextView desc;

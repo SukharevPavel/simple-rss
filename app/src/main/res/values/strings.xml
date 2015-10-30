@@ -2,23 +2,26 @@
     <string name="app_name">SimpleRSS</string>
 
     <!-- readActivity -->
-    <string name = "toast_error_get_rss">Ошибка получения rss-ленты</string>
+    <string name="toast_error_get_rss">Ошибка получения rss-ленты</string>
 
     <!-- menu readAtivity -->
     <string name="menu_find_rss">Найти RSS</string>
-    
+
     <!--fragment_add_rss -->
-    <string name = "add_rss_edit_text_hint">Введите адрес</string>
-    <string name = "dialog_get_rss">Получить</string>
-    <string name = "dialog_add_rss">Добавить</string>
-    <string name = "dialog_cancel">Отмена</string>
+    <string name="add_rss_edit_text_hint">Введите адрес</string>
+    <string name="dialog_get_rss">Получить</string>
+    <string name="dialog_add_rss">Добавить</string>
+    <string name="dialog_cancel">Отмена</string>
 
     <!--fragment_set_rss_name-->
-    <string name = "set_rss_name_edit_text_hint">Введите название RSS-ленты</string>
-    <string name = "set_rss_name_add_to_db">Применить</string>
+    <string name="set_rss_name_edit_text_hint">Введите название RSS-ленты</string>
+    <string name="set_rss_name_add_to_db">Применить</string>
 
-    <!--fragment_rss_list-->
-    <string name = "rss_list_empty">Список пуст!</string>
+    <!--fragment_navigation_drawer-->
+    <string name="rss_list_empty">Список пуст!</string>
+    <string name="context_menu_change_item">Изменить запись</string>
+    <string name="context_menu_delete_item">Удалить запись</string>
+
 
     <string name="rss_list_open">Open navigation drawer</string>
     <string name="rss_list_close">Close navigation drawer</string>
@@ -28,7 +31,6 @@
 
     <!--fragment_rss-->
     <string name="rss_no_data">Неизвестно</string>
-
 
 
 </resources>

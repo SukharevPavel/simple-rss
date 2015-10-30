@@ -5,6 +5,7 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -12,7 +13,9 @@ import android.support.v4.content.Loader;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -33,6 +36,7 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
      * Remember the position of the selected item.
      */
     private static final String STATE_SELECTED_POSITION = "selected_rss_list_position";
+    private static final String DIALOG_CHANGE_ENTRY = "dialog_change_entry";
     /**
      * Per the design guidelines, you should show the drawer on launch until the user manually
      * expands it. This shared preference tracks this.
@@ -94,6 +98,7 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
         getListView().setAdapter(mAdapter);
         getListView().setItemChecked(mCurrentSelectedPosition, true);
         getListView().setOnItemClickListener(mOnItemClickListener);
+        registerForContextMenu(getListView());
     }
 
 
@@ -105,6 +110,28 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
         mCallbacks = (RssCallback) getActivity();
         getLoaderManager().initLoader(CURSOR_LOADER_ID, null, this);
         return v;
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v,
+                                    ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        getActivity().getMenuInflater().inflate(R.menu.context_drawer_rss_item, menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        switch (item.getItemId()) {
+            case R.id.menu_change_item:
+                updateEntryById(info.position);
+                return true;
+            case R.id.delete_item:
+                deleteEntryById(info.position);
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
     }
 
     public boolean isDrawerOpen() {
@@ -184,13 +211,37 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
             mDrawerLayout.closeDrawer(mFragmentContainerView);
         }
         if (mCallbacks != null) {
-            Cursor cursor = mAdapter.getCursor();
-            cursor.moveToPosition(position);
-            String uri = cursor.getString(cursor.getColumnIndex(RssProvider.Columns.RSS_URI));
-            mCallbacks.onGetRssRequest(uri);
+            mCallbacks.onGetRssRequest(getUriById(position));
         }
     }
 
+    private void deleteEntryById(int id) {
+        getActivity().getContentResolver().delete(RssProvider.Uris.URI_RSS,
+                RssProvider.Columns._ID + "=" + id,
+                null);
+    }
+
+    private void updateEntryById(int id) {
+        DialogFragment changeFragment = new SetRssNameDialogFragment();
+        Bundle bundle = new Bundle();
+        Cursor cursor = mAdapter.getCursor();
+        cursor.moveToPosition(id);
+        bundle.putInt(SetRssNameDialogFragment.EXTRA_RSS_POSITION, id);
+        bundle.putString(SetRssNameDialogFragment.EXTRA_RSS_NAME,
+                cursor.getString(cursor.getColumnIndex(RssProvider.Columns.NAME)));
+        bundle.putString(SetRssNameDialogFragment.EXTRA_RSS_URI,
+                cursor.getString(cursor.getColumnIndex(RssProvider.Columns.RSS_URI)));
+        bundle.putBoolean(SetRssNameDialogFragment.EXTRA_RSS_IS_CHANGING,
+                true);
+        changeFragment.setArguments(bundle);
+        changeFragment.show(getFragmentManager(), DIALOG_CHANGE_ENTRY);
+    }
+
+    private String getUriById(int id) {
+        Cursor cursor = mAdapter.getCursor();
+        cursor.moveToPosition(id);
+        return cursor.getString(cursor.getColumnIndex(RssProvider.Columns.RSS_URI));
+    }
 
     @Override
     public void onDetach() {
